@@ -13,11 +13,13 @@
 ./autoencoder/normalised_objs.npy
 ./ad_lsst
 
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
 
+.DS_Store
 # Distribution / packaging
 .Python
 build/
