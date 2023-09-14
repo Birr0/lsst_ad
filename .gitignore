@@ -1,0 +1,46 @@
+./data
+./models
+./autoencoder/tuner
+./autoencoder/weights
+./autoencoder/decoded_objs.npy
+./autoencoder/encoded_objs.npy
+./autoencoder/ET.csv
+./autoencoder/X_test.npy
+./autoencoder/X_train.npy
+./autoencoder/X_valid.npy
+./autoencoder/umap_embedding.npy
+./autoencoder/umap_embedding_with_anoms.npy
+./autoencoder/normalised_objs.npy
+./ad_lsst
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Jupyter Notebook
+.ipynb_checkpoints
