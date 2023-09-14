@@ -50,15 +50,15 @@ def algo_results(data, models, label, iterations = 10, with_noise=True, noise_le
             #y_test_scores = clf.decision_function(X_test) 
             
             f1 = f1_score(np.array(y_test)/label, y_test_pred)
-            balanced_accuracy =  balanced_accuracy_score(y_test, label*y_test_pred)#balanced_accuracy_score(y_test, y_test_pred)
+            balanced_accuracy =  balanced_accuracy_score(y_test, label*y_test_pred)
             
             scores[name]["F1"].append(f1)
             scores[name]["BAL_ACC"].append(balanced_accuracy)
             
-        if not silent:
+        '''if not silent:
             print(name)
             print(f"Accuracy metric: {scores[name]})")
-            print(("------"))
+            print(("------"))'''
 
     return scores
 
@@ -108,13 +108,8 @@ def algo_rank_results(data, models, label, iterations = 10, with_noise=True, noi
 
             rank_scores[name].append(err_score)
 
-            #print(f"Name: {name}, spearman: {spearmanr(rn_model_scores, rn_algo_scores)}, err_score: {np.sum(rn_model_scores * (1 - abs(rn_model_scores - rn_algo_scores)))}")
-            '''if not silent:
-                print(name)
-                print(f"Accuracy metric: {rank_scores[name]})")
-                print(("------"))'''
-
     return rank_scores
+
 def algo_rank_local_results(data, label, iterations = 10, with_noise=True, noise_level = 0, silent = False):
     rank_scores = {key : [] for key in models}
     '''if anom_type == "local":
@@ -226,7 +221,61 @@ def plot_results(scores, anom_type, title):
     )
     return fig, ax
 
-def al_results(data, label, iterations = 10, with_noise=True, noise_level = .1, silent = False):
+def al_results(data, label, iterations = 10, with_noise=True, noise_level = .25, silent = False):
+
+    label_counts = []
+    f1_scores = []
+    acc_scores = []
+    
+    normal, data = np.split(data, [20000])
+
+    for i in np.arange(1, 40, .5):
+    
+        label_scoresf1 = []
+        label_scoresba = []
+            
+        for _ in range(iterations):
+            if with_noise:
+                #duplicate_idx = np.random.choice(500, size=100, replace=False)
+
+                noisy_features = data[:, :5] + data[:, -5:] # 3 sigma noise
+                
+                noisy_features =  np.concatenate([noisy_features]) #, noisy_features[duplicate_idx, 0:5]]) # Add duplicates
+
+                noisy_labels = np.concatenate([data[:, 5]]) #, data[duplicate_idx, 5]])
+                
+                # Should I make use of training score?
+                X_train, X_test, y_train, y_test = train_test_split(
+                    noisy_features, 
+                    noisy_labels, # score column of dataset
+                    test_size=.01*i,
+                    stratify=noisy_labels,
+                    shuffle=True,
+                    #random_seed=42 # Is this a good way to regualarise the peakiness.
+                )
+
+                y_train = np.array(y_train/float(label), dtype="int64")
+                y_test = np.array(y_test/float(label), dtype="int64")
+
+                X_test = np.concatenate([normal[:, 0:5], X_test])
+                y_test = np.concatenate([np.zeros(len(normal[:, 0:5])), y_test])
+
+                
+                
+                bst = xgb.XGBClassifier(max_depth = 25).fit(X_test, y_test)
+                #print(len(X_test), y_test.sum())
+
+                y_test_pred = bst.predict(X_train)#rfc.predict(X_train)
+                label_scoresf1.append(f1_score(y_train, y_test_pred))
+                label_scoresba.append(balanced_accuracy_score(y_train, y_test_pred))
+
+        f1_scores.append(label_scoresf1)
+        acc_scores.append(label_scoresba)
+        label_counts.append(y_test.sum())
+        
+    return label_counts, acc_scores, f1_scores, 
+
+'''def al_results(data, label, iterations = 10, with_noise=True, noise_level = .1, silent = False):
     label_counts = []
     f1_scores = []
     acc_scores = []
@@ -259,7 +308,7 @@ def al_results(data, label, iterations = 10, with_noise=True, noise_level = .1, 
 
                 bst = xgb.XGBClassifier(max_depth = 10).fit(X_test, y_test)
 
-                y_test_pred = bst.predict(X_train)#rfc.predict(X_train)
+                y_test_pred = bst.predict(X_train)
                 label_scoresf1.append(f1_score(y_train, y_test_pred))
                 label_scoresba.append(balanced_accuracy_score(y_train, y_test_pred))
 
@@ -268,3 +317,4 @@ def al_results(data, label, iterations = 10, with_noise=True, noise_level = .1, 
         label_counts.append(y_test.sum())
  
     return label_counts, acc_scores, f1_scores
+'''
