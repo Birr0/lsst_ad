@@ -23,15 +23,10 @@ def init_algos(contamination):
         "LOF": LOF(contamination = contamination),
         "ABOD": ABOD(contamination = contamination),
         "CBLOF": CBLOF(contamination = contamination),
-        #"COF": COF(),
         "CD": CD(contamination = contamination),
         "COPOD": COPOD(contamination = contamination),
         "Feature Bagging": FeatureBagging(contamination = contamination),
-        "HBOS": HBOS(contamination = contamination),
-        #"INNE": INNE(),
-        #"KDE": KDE(),
-        #"LOCI": LOCI(),
-        #"PCA": PCA(),
+        "HBOS": HBOS(contamination = contamination)
     }
     
 models = {

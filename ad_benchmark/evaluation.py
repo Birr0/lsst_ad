@@ -187,7 +187,6 @@ def algo_rank_local_results(data, label, iterations = 10, with_noise=True, noise
     return rank_scores
 
 
-
 def result_df(scores, anom_type):
     _result_df = pd.DataFrame(
         columns = ["Algorithm", "score", "type", "metric"]
@@ -274,6 +273,56 @@ def al_results(data, label, iterations = 10, with_noise=True, noise_level = .25,
         label_counts.append(y_test.sum())
         
     return label_counts, acc_scores, f1_scores, 
+
+def algo_rank_local_results(data, label, iterations = 10, with_noise=True, noise_level = 0, silent = False):
+    rank_scores = {key : [] for key in models}
+    '''if anom_type == "local":
+        idx = -1
+    else:'''
+    idx = -1
+
+    for i in range(iterations):
+        if with_noise:
+            duplicate_idx = np.random.choice(500, size=100, replace=False)
+
+            noisy_features = data[:, :5] + noise_level*data[:, -6:-1]
+            noisy_features =  np.concatenate([noisy_features, noisy_features[duplicate_idx, 0:5]]) # Add duplicates
+
+            noisy_scores = np.concatenate([data[:, idx], data[duplicate_idx, idx]])
+            noisy_labels = np.concatenate([data[:, 5], data[duplicate_idx, 5]])
+
+            # Should I make use of training score?
+            X_train, X_test, y_train, y_test = train_test_split(
+                noisy_features, 
+                noisy_scores, 
+                test_size=.3,
+                #random_state=42,
+                stratify=noisy_labels,
+                shuffle=True
+            )
+                    
+        else:
+            X_train, X_test, y_train, y_test = train_test_split(
+                data[:, 0:5], 
+                data[:, idx], # score column of dataset
+                test_size=.3,
+                #random_state=42,
+                stratify=data[:, 5],
+                shuffle=True
+            )
+
+        rn_model_idx = np.argsort(y_test)[-500::]
+
+        for name, clf in zip(models.keys(), models.values()):
+            
+            clf.fit(X_train)
+ 
+            y_test_scores = clf.decision_function(X_test)  # outlier scoress
+
+            err_score = len(np.intersect1d(rn_model_idx, np.argsort(y_test_scores)[-500::])) / 500 # Overlap of the top 100 outliers.
+            rank_scores[name].append(err_score)
+
+    return rank_scores
 
 '''def al_results(data, label, iterations = 10, with_noise=True, noise_level = .1, silent = False):
     label_counts = []
