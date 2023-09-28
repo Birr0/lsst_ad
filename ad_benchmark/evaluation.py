@@ -55,10 +55,10 @@ def algo_results(data, models, label, iterations = 10, with_noise=True, noise_le
             scores[name]["F1"].append(f1)
             scores[name]["BAL_ACC"].append(balanced_accuracy)
             
-        '''if not silent:
+        if not silent:
             print(name)
             print(f"Accuracy metric: {scores[name]})")
-            print(("------"))'''
+            print(("------"))
 
     return scores
 
